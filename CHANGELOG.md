@@ -1,3 +1,6 @@
+## 5.1.1
+- Move to `django-commons` 
+
 ## 5.1.0
 - Drop support for Python 3.8 and 3.9
 - Migrate packaging to `pyproject.toml` (PEP 621); drop `setup.py`
