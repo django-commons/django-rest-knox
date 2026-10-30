@@ -36,9 +36,9 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/jazzband/django-rest-knox"
-Documentation = "https://jazzband.co/projects/django-rest-knox"
-Changelog = "https://github.com/jazzband/django-rest-knox/blob/master/CHANGELOG.md"
+Homepage = "https://github.com/django-commons/django-rest-knox"
+Documentation = "https://django-commons.org/django-rest-knox/"
+Changelog = "https://github.com/django-commons/django-rest-knox/blob/master/CHANGELOG.md"
 
 [tool.setuptools]
 include-package-data = true
@@ -61,5 +61,3 @@ exclude_lines = [
     "raise NotImplementedError",
     "if __name__ == .__main__.:",
 ]
-
-
