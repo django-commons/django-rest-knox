@@ -17,8 +17,7 @@ class AuthTokenTests(TestCase):
     def setUp(self):
         self.User = get_user_model()
         self.user = self.User.objects.create_user(
-            username='testuser',
-            password='testpass123'
+            username="testuser", password="testpass123"
         )
 
     def test_token_creation(self):
@@ -35,10 +34,7 @@ class AuthTokenTests(TestCase):
                 CONSTANTS.TOKEN_KEY_LENGTH,
             )
             self.assertEqual(instance.user, self.user)
-            self.assertEqual(
-                instance.expiry,
-                token_creation + timedelta(hours=10)
-            )
+            self.assertEqual(instance.expiry, token_creation + timedelta(hours=10))
 
     def test_token_creation_with_expiry(self):
         """
@@ -46,10 +42,7 @@ class AuthTokenTests(TestCase):
         """
         expiry_time = timedelta(hours=10)
         before_creation = timezone.now()
-        instance, _ = AuthToken.objects.create(
-            user=self.user,
-            expiry=expiry_time
-        )
+        instance, _ = AuthToken.objects.create(user=self.user, expiry=expiry_time)
         self.assertIsNotNone(instance.expiry)
         self.assertTrue(before_creation < instance.expiry)
         self.assertTrue(
@@ -61,7 +54,7 @@ class AuthTokenTests(TestCase):
         Test the string representation of AuthToken.
         """
         instance, _ = AuthToken.objects.create(user=self.user)
-        expected_str = f'{instance.digest} : {self.user}'
+        expected_str = f"{instance.digest} : {self.user}"
         self.assertEqual(str(instance), expected_str)
 
     def test_multiple_tokens_for_user(self):
@@ -79,10 +72,7 @@ class AuthTokenTests(TestCase):
         Test token creation with custom prefix.
         """
         custom_prefix = "TEST_"
-        instance, token = AuthToken.objects.create(
-            user=self.user,
-            prefix=custom_prefix
-        )
+        instance, token = AuthToken.objects.create(user=self.user, prefix=custom_prefix)
         self.assertTrue(token.startswith(custom_prefix))
         self.assertTrue(instance.token_key.startswith(custom_prefix))
 
@@ -92,7 +82,7 @@ class AuthTokenTests(TestCase):
         the full token string (including any prefix).
         """
         instance, token = AuthToken.objects.create(user=self.user)
-        self.assertEqual(instance.token_key, token[:CONSTANTS.TOKEN_KEY_LENGTH])
+        self.assertEqual(instance.token_key, token[: CONSTANTS.TOKEN_KEY_LENGTH])
 
     def test_token_key_with_prefix_includes_prefix(self):
         """
@@ -102,9 +92,10 @@ class AuthTokenTests(TestCase):
         """
         prefix = "PRE_"
         instance, token = AuthToken.objects.create(
-            user=self.user, prefix=prefix,
+            user=self.user,
+            prefix=prefix,
         )
-        self.assertEqual(instance.token_key, token[:CONSTANTS.TOKEN_KEY_LENGTH])
+        self.assertEqual(instance.token_key, token[: CONSTANTS.TOKEN_KEY_LENGTH])
         self.assertTrue(instance.token_key.startswith(prefix))
 
     def test_create_with_no_expiry(self):

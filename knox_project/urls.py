@@ -6,7 +6,7 @@ from django.urls import include, path
 from .views import RootView
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('api/', include('knox.urls')),
-    path('api/', RootView.as_view(), name="api-root"),
+    path("admin/", admin.site.urls),
+    path("api/", include("knox.urls")),
+    path("api/", RootView.as_view(), name="api-root"),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
