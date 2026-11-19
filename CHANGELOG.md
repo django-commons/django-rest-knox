@@ -1,5 +1,6 @@
 ## 5.1.1
 - Move to `django-commons` 
+- Add support for Django 6.1
 
 ## 5.1.0
 - Drop support for Python 3.8 and 3.9
