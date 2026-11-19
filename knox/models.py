@@ -48,8 +48,6 @@ class AuthTokenManager(models.Manager):
 
 class AbstractAuthToken(models.Model):
 
-    objects = AuthTokenManager()
-
     digest = models.CharField(
         max_length=CONSTANTS.DIGEST_LENGTH, primary_key=True)
     token_key = models.CharField(
@@ -61,6 +59,8 @@ class AbstractAuthToken(models.Model):
                              related_name='auth_token_set', on_delete=models.CASCADE)
     created = models.DateTimeField(auto_now_add=True)
     expiry = models.DateTimeField(null=True, blank=True)
+
+    objects = AuthTokenManager()
 
     class Meta:
         abstract = True
@@ -87,6 +87,6 @@ def get_token_model():
         )
     except LookupError:
         raise ImproperlyConfigured(
-            "TOKEN_MODEL refers to model '%s' that has not been installed"
-            % knox_settings.TOKEN_MODEL
+            f"TOKEN_MODEL refers to model '{knox_settings.TOKEN_MODEL}' "
+            "that has not been installed"
         )

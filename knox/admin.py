@@ -9,7 +9,7 @@ from knox.settings import CONSTANTS
 class AuthTokenCreateForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
-        super(AuthTokenCreateForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.token = None
 
     class Meta:
@@ -17,7 +17,7 @@ class AuthTokenCreateForm(forms.ModelForm):
         fields = ['user', 'expiry']
 
     def save(self, commit=True):
-        obj = super(AuthTokenCreateForm, self).save(commit=False)
+        obj = super().save(commit=False)
         digest, token = models.get_digest_token()
         obj.digest = digest
         obj.token_key = token[:CONSTANTS.TOKEN_KEY_LENGTH]
@@ -42,9 +42,9 @@ class AuthTokenAdmin(admin.ModelAdmin):
         if obj is None:
             defaults['form'] = self.add_form
         defaults.update(kwargs)
-        return super(AuthTokenAdmin, self).get_form(request, obj, **defaults)
+        return super().get_form(request, obj, **defaults)
 
     def save_model(self, request, obj, form, change):
         if not change:
             self.message_user(request, "TOKEN " + form.token, messages.INFO)
-        super(AuthTokenAdmin, self).save_model(request, obj, form, change)
+        super().save_model(request, obj, form, change)

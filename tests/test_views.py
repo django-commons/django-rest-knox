@@ -23,8 +23,8 @@ def get_basic_auth_header(username, password):
     """
     Create a basic auth header (test helper).
     """
-    return 'Basic %s' % base64.b64encode(
-        (f'{username}:{password}').encode('ascii')).decode()
+    return 'Basic {}'.format(base64.b64encode(
+        (f'{username}:{password}').encode('ascii')).decode())
 
 
 auto_refresh_knox = knox_settings.defaults.copy()
@@ -153,7 +153,7 @@ class LogoutViewsTestCase(BaseTestCase):
         self.assertEqual(AuthToken.objects.count(), 2)
 
         url = reverse('knox_logout')
-        self.client.credentials(HTTP_AUTHORIZATION=('Token %s' % token))
+        self.client.credentials(HTTP_AUTHORIZATION=(f'Token {token}'))
         self.client.post(url, {}, format='json')
         self.assertEqual(AuthToken.objects.count(), 1,
                          'other tokens should remain after logout')
@@ -169,7 +169,7 @@ class LogoutViewsTestCase(BaseTestCase):
         self.assertEqual(AuthToken.objects.count(), 2)
 
         url = reverse('knox_logout')
-        self.client.credentials(HTTP_AUTHORIZATION=('Token %s' % token_a))
+        self.client.credentials(HTTP_AUTHORIZATION=(f'Token {token_a}'))
         response = self.client.post(url, {}, format='json')
         self.assertEqual(response.status_code, 204)
 
@@ -178,7 +178,7 @@ class LogoutViewsTestCase(BaseTestCase):
         self.assertTrue(AuthToken.objects.filter(digest=instance_b.digest).exists())
 
         # token_b still authenticates successfully
-        self.client.credentials(HTTP_AUTHORIZATION=('Token %s' % token_b))
+        self.client.credentials(HTTP_AUTHORIZATION=(f'Token {token_b}'))
         response = self.client.get(root_url, {}, format='json')
         self.assertEqual(response.status_code, 200)
 
@@ -189,7 +189,7 @@ class LogoutViewsTestCase(BaseTestCase):
         self.assertEqual(AuthToken.objects.count(), 10)
 
         url = reverse('knox_logoutall')
-        self.client.credentials(HTTP_AUTHORIZATION=('Token %s' % token))
+        self.client.credentials(HTTP_AUTHORIZATION=(f'Token {token}'))
         self.client.post(url, {}, format='json')
         self.assertEqual(AuthToken.objects.count(), 0)
 
@@ -201,7 +201,7 @@ class LogoutViewsTestCase(BaseTestCase):
         self.assertEqual(AuthToken.objects.count(), 20)
 
         url = reverse('knox_logoutall')
-        self.client.credentials(HTTP_AUTHORIZATION=('Token %s' % token))
+        self.client.credentials(HTTP_AUTHORIZATION=(f'Token {token}'))
         self.client.post(url, {}, format='json')
         self.assertEqual(AuthToken.objects.count(), 10,
                          'tokens from other users should not be affected by logout all')
@@ -216,7 +216,7 @@ class TokenAuthenticationTestCase(BaseTestCase):
         self.assertEqual(AuthToken.objects.count(), 0)
         instance, token = AuthToken.objects.create(
             user=self.user, expiry=timedelta(seconds=-1))
-        self.client.credentials(HTTP_AUTHORIZATION=('Token %s' % token))
+        self.client.credentials(HTTP_AUTHORIZATION=(f'Token {token}'))
         response = self.client.post(root_url, {}, format='json')
         self.assertEqual(response.status_code, 401)
         self.assertEqual(response.data, {"detail": "Invalid token."})
@@ -231,7 +231,7 @@ class TokenAuthenticationTestCase(BaseTestCase):
 
         # Attempting a single logout should delete all tokens
         url = reverse('knox_logout')
-        self.client.credentials(HTTP_AUTHORIZATION=('Token %s' % token))
+        self.client.credentials(HTTP_AUTHORIZATION=(f'Token {token}'))
         self.client.post(url, {}, format='json')
         self.assertEqual(AuthToken.objects.count(), 0)
 
@@ -290,7 +290,7 @@ class TokenAuthenticationTestCase(BaseTestCase):
 
     def test_invalid_token_length_returns_401_code(self):
         invalid_token = "1" * (CONSTANTS.TOKEN_KEY_LENGTH - 1)
-        self.client.credentials(HTTP_AUTHORIZATION=('Token %s' % invalid_token))
+        self.client.credentials(HTTP_AUTHORIZATION=(f'Token {invalid_token}'))
         response = self.client.post(root_url, {}, format='json')
         self.assertEqual(response.status_code, 401)
         self.assertEqual(response.data, {"detail": "Invalid token."})
@@ -298,7 +298,7 @@ class TokenAuthenticationTestCase(BaseTestCase):
     def test_invalid_odd_length_token_returns_401_code(self):
         _, token = AuthToken.objects.create(self.user)
         odd_length_token = token + '1'
-        self.client.credentials(HTTP_AUTHORIZATION=('Token %s' % odd_length_token))
+        self.client.credentials(HTTP_AUTHORIZATION=(f'Token {odd_length_token}'))
         response = self.client.post(root_url, {}, format='json')
         self.assertEqual(response.status_code, 401)
         self.assertEqual(response.data, {"detail": "Invalid token."})
@@ -312,7 +312,7 @@ class TokenAuthenticationTestCase(BaseTestCase):
         with freeze_time(original_time):
             _, token = AuthToken.objects.create(user=self.user)
 
-        self.client.credentials(HTTP_AUTHORIZATION=('Token %s' % token))
+        self.client.credentials(HTTP_AUTHORIZATION=(f'Token {token}'))
         five_hours_later = original_time + timedelta(hours=5)
         with override_settings(REST_KNOX=auto_refresh_knox):
             with freeze_time(five_hours_later):
@@ -323,8 +323,9 @@ class TokenAuthenticationTestCase(BaseTestCase):
         new_expiry = AuthToken.objects.get().expiry
         expected_expiry = original_time + ttl + timedelta(hours=5)
         self.assertEqual(new_expiry.replace(tzinfo=None), expected_expiry,
-                         "Expiry time should have been extended to {} but is {}."
-                         .format(expected_expiry, new_expiry))
+                         f"Expiry time should have been extended to "
+                         f"{expected_expiry} but is {new_expiry}."
+                         )
 
         # token works after original expiry:
         after_original_expiry = original_time + ttl + timedelta(hours=1)
@@ -348,7 +349,7 @@ class TokenAuthenticationTestCase(BaseTestCase):
 
         original_expiry = AuthToken.objects.get().expiry
 
-        self.client.credentials(HTTP_AUTHORIZATION=('Token %s' % token))
+        self.client.credentials(HTTP_AUTHORIZATION=(f'Token {token}'))
         with freeze_time(now + timedelta(hours=1)):
             response = self.client.get(root_url, {}, format='json')
 
@@ -362,7 +363,7 @@ class TokenAuthenticationTestCase(BaseTestCase):
 
         original_expiry = AuthToken.objects.get().expiry
 
-        self.client.credentials(HTTP_AUTHORIZATION=('Token %s' % token))
+        self.client.credentials(HTTP_AUTHORIZATION=(f'Token {token}'))
         in_min_interval = now + timedelta(seconds=knox_settings.MIN_REFRESH_INTERVAL - 10)
         with override_settings(REST_KNOX=auto_refresh_knox):
             with freeze_time(in_min_interval):
@@ -379,7 +380,7 @@ class TokenAuthenticationTestCase(BaseTestCase):
         with freeze_time(original_time):
             instance, token = AuthToken.objects.create(user=self.user)
 
-        self.client.credentials(HTTP_AUTHORIZATION=('Token %s' % token))
+        self.client.credentials(HTTP_AUTHORIZATION=(f'Token {token}'))
         five_hours_later = original_time + timedelta(hours=5)
         with override_settings(REST_KNOX=auto_refresh_max_ttl_knox):
             with freeze_time(five_hours_later):
@@ -390,8 +391,9 @@ class TokenAuthenticationTestCase(BaseTestCase):
         new_expiry = AuthToken.objects.get().expiry
         expected_expiry = original_time + timedelta(hours=12)
         self.assertEqual(new_expiry.replace(tzinfo=None), expected_expiry,
-                         "Expiry time should have been extended to {} but is {}."
-                         .format(expected_expiry, new_expiry))
+                         f"Expiry time should have been extended to "
+                         f"{expected_expiry} but is {new_expiry}."
+                         )
 
         with freeze_time(expected_expiry + timedelta(seconds=1)):
             response = self.client.get(root_url, {}, format='json')
@@ -409,7 +411,7 @@ class TokenAuthenticationTestCase(BaseTestCase):
             user=self.user,
             expiry=timedelta(seconds=-1),
         )
-        self.client.credentials(HTTP_AUTHORIZATION=('Token %s' % token))
+        self.client.credentials(HTTP_AUTHORIZATION=(f'Token {token}'))
         self.client.post(root_url, {}, format='json')
 
         self.assertTrue(self.signal_was_called)
@@ -501,11 +503,11 @@ class TokenAuthenticationTestCase(BaseTestCase):
     def test_invalid_prefix_return_401(self):
         with override_settings(REST_KNOX=auth_header_prefix_knox):
             instance, token = AuthToken.objects.create(user=self.user)
-            self.client.credentials(HTTP_AUTHORIZATION=('Token %s' % token))
+            self.client.credentials(HTTP_AUTHORIZATION=(f'Token {token}'))
             failed_response = self.client.get(root_url)
             self.client.credentials(
                 HTTP_AUTHORIZATION=(
-                    'Baerer %s' % token
+                    f'Baerer {token}'
                 )
             )
             response = self.client.get(root_url)
@@ -582,7 +584,7 @@ class TokenAuthenticationTestCase(BaseTestCase):
             self.assertEqual(response.status_code, 200)
             self.assertTrue(response.data['token'].startswith(token_prefix))
             self.client.credentials(
-                HTTP_AUTHORIZATION=('Token %s' % response.data['token'])
+                HTTP_AUTHORIZATION=('Token {}'.format(response.data['token']))
             )
             response = self.client.get(root_url, {}, format='json')
             self.assertEqual(response.status_code, 200)
@@ -605,7 +607,7 @@ class TokenAuthenticationTestCase(BaseTestCase):
         self.assertFalse(response.data['token'].startswith(token_prefix))
         with override_settings(REST_KNOX=token_prefix_knox):
             self.client.credentials(
-                HTTP_AUTHORIZATION=('Token %s' % response.data['token'])
+                HTTP_AUTHORIZATION=('Token {}'.format(response.data['token']))
             )
             response = self.client.get(root_url, {}, format='json')
             self.assertEqual(response.status_code, 200)
