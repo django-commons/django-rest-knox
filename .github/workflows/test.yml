@@ -19,6 +19,9 @@ jobs:
     - name: Ruff lint
       run: ruff check .
 
+    - name: Ruff format
+      run: ruff format --check .
+
   build:
     runs-on: ubuntu-latest
     strategy:

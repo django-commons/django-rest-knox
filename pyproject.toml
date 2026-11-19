@@ -53,6 +53,9 @@ exclude = ["contrib*", "docs*", "tests*", "knox_project*"]
 line-length = 90
 extend-exclude = ["**/migrations/*"]
 
+[tool.ruff.format]
+exclude = ["*.md"]
+
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "UP", "S", "DJ"]
 
