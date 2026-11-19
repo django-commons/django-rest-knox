@@ -3,7 +3,7 @@ repos:
     rev: 1.31.1
     hooks:
       - id: django-upgrade
-        args: [--target-version, "4.2"]
+        args: [--target-version, "5.2"]
 
   - repo: https://github.com/PyCQA/isort
     rev: 9.0.0b5
