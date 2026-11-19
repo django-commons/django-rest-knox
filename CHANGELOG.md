@@ -2,7 +2,9 @@
 - Drop support for Python 3.10 (EOL Oct 2026), Django 4.2 (EOL Apr 2026) and Django 5.0 (EOL Apr 2025)
 - Add support for Python 3.15 and Django 6.1
 - Require Python 3.11+, Django 5.2+ and djangorestframework 3.16+
-- Update test matrix (tox, CI) and django-upgrade target to 5.2
+- Update test matrix (tox, CI)
+- Replace flake8, isort and pre-commit with `ruff` for linting and formatting, enforced in CI
+- Reformat codebase with `ruff format`
 
 ## 5.1.1
 - Move to `django-commons` 
