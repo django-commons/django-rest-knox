@@ -9,6 +9,7 @@ class RootView(APIView):
     """
     API Root View to test authentication.
     """
+
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 

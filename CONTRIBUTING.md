@@ -1,3 +1,7 @@
-[![Jazzband](https://jazzband.co/static/img/jazzband.svg)](https://jazzband.co/)
+This project is part of [Django Commons](https://django-commons.org/).
 
-This is a [Jazzband](https://jazzband.co/) project. By contributing you agree to abide by the [Contributor Code of Conduct](https://jazzband.co/about/conduct) and follow the [guidelines](https://jazzband.co/about/guidelines).
+Please follow the [Django Commons Code of Conduct](CODE_OF_CONDUCT.md) when contributing.
+
+See the [README](README.md#run-the-tests-locally) for how to run the tests, and the
+[linting and formatting](README.md#linting-and-formatting) section for the code style
+tooling (ruff) that CI enforces.

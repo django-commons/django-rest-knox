@@ -22,7 +22,7 @@ class LoginView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def get_context(self) -> dict[str, Any]:
-        return {'request': self.request, 'format': self.format_kwarg, 'view': self}
+        return {"request": self.request, "format": self.format_kwarg, "view": self}
 
     def get_token_ttl(self) -> timedelta | None:
         return knox_settings.TOKEN_TTL
@@ -54,20 +54,12 @@ class LoginView(APIView):
     ) -> dict[str, Any]:
         UserSerializer = self.get_user_serializer_class()
 
-        data = {
-            'expiry': self.format_expiry_datetime(instance.expiry),
-            'token': token
-        }
+        data = {"expiry": self.format_expiry_datetime(instance.expiry), "token": token}
         if UserSerializer is not None:
-            data["user"] = UserSerializer(
-                request.user,
-                context=self.get_context()
-            ).data
+            data["user"] = UserSerializer(request.user, context=self.get_context()).data
         return data
 
-    def get_post_response(
-        self, request: Request, token: str, instance
-    ) -> Response:
+    def get_post_response(self, request: Request, token: str, instance) -> Response:
         data = self.get_post_response_data(request, token, instance)
         return Response(data)
 
@@ -81,11 +73,12 @@ class LoginView(APIView):
             if token.count() >= token_limit_per_user:
                 return Response(
                     {"error": "Maximum amount of tokens allowed per user exceeded."},
-                    status=status.HTTP_403_FORBIDDEN
+                    status=status.HTTP_403_FORBIDDEN,
                 )
         instance, token = self.create_token()
-        user_logged_in.send(sender=request.user.__class__,
-                            request=request, user=request.user)
+        user_logged_in.send(
+            sender=request.user.__class__, request=request, user=request.user
+        )
         return self.get_post_response(request, token, instance)
 
 
@@ -98,16 +91,18 @@ class LogoutView(APIView):
 
     def post(self, request: Request, format: Any = None) -> Response:
         request._auth.delete()
-        user_logged_out.send(sender=request.user.__class__,
-                             request=request, user=request.user)
+        user_logged_out.send(
+            sender=request.user.__class__, request=request, user=request.user
+        )
         return self.get_post_response(request)
 
 
 class LogoutAllView(APIView):
-    '''
+    """
     Log the user out of all sessions
     I.E. deletes all auth tokens for the user
-    '''
+    """
+
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 
@@ -116,6 +111,7 @@ class LogoutAllView(APIView):
 
     def post(self, request: Request, format: Any = None) -> Response:
         request.user.auth_token_set.all().delete()
-        user_logged_out.send(sender=request.user.__class__,
-                             request=request, user=request.user)
+        user_logged_out.send(
+            sender=request.user.__class__, request=request, user=request.user
+        )
         return self.get_post_response(request)

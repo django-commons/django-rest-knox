@@ -21,16 +21,20 @@ class CleanupTokenTestCase(TestCase):
 
     def setUp(self):
         self.user = User.objects.create_user(
-            username='john.doe', email='john@example.com', password='hunter2',
+            username="john.doe",
+            email="john@example.com",
+            password="hunter2",
         )
         self.user2 = User.objects.create_user(
-            username='jane.doe', email='jane@example.com', password='hunter2',
+            username="jane.doe",
+            email="jane@example.com",
+            password="hunter2",
         )
         self.factory = APIRequestFactory()
 
     def _authenticate(self, token):
-        request = self.factory.get('/')
-        request.META = {'HTTP_AUTHORIZATION': f'Token {token}'}
+        request = self.factory.get("/")
+        request.META = {"HTTP_AUTHORIZATION": f"Token {token}"}
         return TokenAuthentication().authenticate(request)
 
     # -- deletion scoping ------------------------------------------------
@@ -85,7 +89,8 @@ class CleanupTokenTestCase(TestCase):
         from rest_framework.exceptions import AuthenticationFailed
 
         _, expired_token = AuthToken.objects.create(
-            user=self.user, expiry=timedelta(seconds=-1),
+            user=self.user,
+            expiry=timedelta(seconds=-1),
         )
         self.assertEqual(AuthToken.objects.count(), 1)
         with self.assertRaises(AuthenticationFailed):
@@ -113,7 +118,7 @@ class CleanupTokenTestCase(TestCase):
         finally:
             token_expired.disconnect(handler)
 
-        self.assertIn('other_token', received)
+        self.assertIn("other_token", received)
 
     def test_cleanup_signal_source_auth_token(self):
         """
@@ -123,7 +128,8 @@ class CleanupTokenTestCase(TestCase):
         from rest_framework.exceptions import AuthenticationFailed
 
         _, expired_token = AuthToken.objects.create(
-            user=self.user, expiry=timedelta(seconds=-1),
+            user=self.user,
+            expiry=timedelta(seconds=-1),
         )
 
         received = []
@@ -138,7 +144,7 @@ class CleanupTokenTestCase(TestCase):
         finally:
             token_expired.disconnect(handler)
 
-        self.assertIn('auth_token', received)
+        self.assertIn("auth_token", received)
 
     # -- query-count baseline -------------------------------------------
 
@@ -154,8 +160,8 @@ class CleanupTokenTestCase(TestCase):
         for _ in range(5):
             AuthToken.objects.create(user=self.user, expiry=timedelta(seconds=-1))
 
-        request = self.factory.get('/')
-        request.META = {'HTTP_AUTHORIZATION': f'Token {valid_token}'}
+        request = self.factory.get("/")
+        request.META = {"HTTP_AUTHORIZATION": f"Token {valid_token}"}
         # 1 filter + 1 auth_token_set.all() + 5 deletes = 7
         with self.assertNumQueries(7):
             TokenAuthentication().authenticate(request)

@@ -2,6 +2,12 @@
 
 ## Requirements
 
+Knox requires:
+
+- Python 3.11+
+- Django 5.2+
+- Django REST Framework 3.16+
+
 Knox depends on pythons internal library `hashlib` to provide bindings to `OpenSSL` or uses
 an internal implementation of hashing algorithms for token generation.
 

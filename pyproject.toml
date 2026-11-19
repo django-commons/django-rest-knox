@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "django-rest-knox"
 description = "Authentication for django rest framework"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 license = { text = "MIT" }
 authors = [
     { name = "James McMahon", email = "james1345@googlemail.com" },
@@ -19,26 +19,25 @@ classifiers = [
     "Topic :: Internet :: WWW/HTTP :: Session",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
     "Framework :: Django",
-    "Framework :: Django :: 4.2",
-    "Framework :: Django :: 5.0",
     "Framework :: Django :: 5.2",
     "Framework :: Django :: 6.0",
+    "Framework :: Django :: 6.1",
 ]
 dependencies = [
-    "django>=4.2",
-    "djangorestframework>=3.14",
+    "django>=5.2",
+    "djangorestframework>=3.16",
 ]
 
 [project.urls]
-Homepage = "https://github.com/jazzband/django-rest-knox"
-Documentation = "https://jazzband.co/projects/django-rest-knox"
-Changelog = "https://github.com/jazzband/django-rest-knox/blob/master/CHANGELOG.md"
+Homepage = "https://github.com/django-commons/django-rest-knox"
+Documentation = "https://django-commons.org/django-rest-knox/"
+Changelog = "https://github.com/django-commons/django-rest-knox/blob/master/CHANGELOG.md"
 
 [tool.setuptools]
 include-package-data = true
@@ -49,6 +48,27 @@ version = { attr = "knox.__init__.__version__" }
 [tool.setuptools.packages.find]
 include = ["knox*"]
 exclude = ["contrib*", "docs*", "tests*", "knox_project*"]
+
+[tool.ruff]
+line-length = 90
+extend-exclude = ["**/migrations/*"]
+
+[tool.ruff.format]
+exclude = ["*.md"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "S", "DJ"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "S105", "S106"]
+"knox_project/**" = ["S105"]
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+known-first-party = ["knox"]
 
 [tool.coverage.run]
 branch = true
@@ -61,5 +81,3 @@ exclude_lines = [
     "raise NotImplementedError",
     "if __name__ == .__main__.:",
 ]
-
-

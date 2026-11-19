@@ -1,8 +1,7 @@
 django-rest-knox
 ================
 
-[![Jazzband](https://jazzband.co/static/img/badge.svg)](https://jazzband.co/)
-[![image](https://github.com/jazzband/django-rest-knox/workflows/Test/badge.svg?branch=develop)](https://github.com/jazzband/django-rest-knox/actions)
+[![image](https://github.com/django-commons/django-rest-knox/workflows/Test/badge.svg?branch=develop)](https://github.com/django-commons/django-rest-knox/actions)
 
 Authentication module for Django rest auth.
 
@@ -41,7 +40,7 @@ default implementation:
     the app settings (default is 10 hours.)
 
 More information can be found in the
-[Documentation](https://jazzband.github.io/django-rest-knox/)
+[Documentation](https://django-commons.org/django-rest-knox/)
 
 # Run the tests locally
 
@@ -51,6 +50,28 @@ Django versions.
 
 You could also simply run regular ``tox`` in the root folder as well, but that would make testing the matrix of
 Python / Django versions a bit more tricky.
+
+# Linting and formatting
+
+We use [ruff](https://docs.astral.sh/ruff/) for both linting and formatting, configured in
+`pyproject.toml`. CI runs both checks on every push and pull request, so run them before
+opening a PR:
+
+```
+pip install ruff==0.17.5
+ruff check .
+ruff format .
+```
+
+Use the same ruff version as CI (see `.github/workflows/test.yml`) to avoid formatting
+differences. `ruff check --fix .` will fix most lint issues automatically.
+
+The commit that reformatted the codebase with ruff is listed in `.git-blame-ignore-revs`.
+To have `git blame` skip it locally, run once:
+
+```
+git config blame.ignoreRevsFile .git-blame-ignore-revs
+```
 
 # Work on the documentation
 
