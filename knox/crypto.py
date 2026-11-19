@@ -34,7 +34,7 @@ def make_hex_compatible(token: str) -> bytes:
     Returns:
         bytes: The hex-compatible bytes representation of the token.
     """
-    return binascii.unhexlify(binascii.hexlify(bytes(token, 'utf-8')))
+    return binascii.unhexlify(binascii.hexlify(bytes(token, "utf-8")))
 
 
 def hash_token(token: str) -> str:

@@ -28,35 +28,35 @@ _UNSET = object()
 
 
 class AuthTokenManager(models.Manager):
-    def create(
-        self,
-        user,
-        expiry=_UNSET,
-        prefix=None,
-        **kwargs
-    ):
+    def create(self, user, expiry=_UNSET, prefix=None, **kwargs):
         if expiry is _UNSET:
             expiry = knox_settings.TOKEN_TTL
         digest, token = get_digest_token(prefix)
         if expiry is not None:
             expiry = timezone.now() + expiry
         instance = super().create(
-            token_key=token[:CONSTANTS.TOKEN_KEY_LENGTH], digest=digest,
-            user=user, expiry=expiry, **kwargs)
+            token_key=token[: CONSTANTS.TOKEN_KEY_LENGTH],
+            digest=digest,
+            user=user,
+            expiry=expiry,
+            **kwargs,
+        )
         return instance, token
 
 
 class AbstractAuthToken(models.Model):
-
-    digest = models.CharField(
-        max_length=CONSTANTS.DIGEST_LENGTH, primary_key=True)
+    digest = models.CharField(max_length=CONSTANTS.DIGEST_LENGTH, primary_key=True)
     token_key = models.CharField(
-        max_length=CONSTANTS.MAXIMUM_TOKEN_PREFIX_LENGTH +
-        CONSTANTS.TOKEN_KEY_LENGTH,
-        db_index=True
+        max_length=CONSTANTS.MAXIMUM_TOKEN_PREFIX_LENGTH + CONSTANTS.TOKEN_KEY_LENGTH,
+        db_index=True,
     )
-    user = models.ForeignKey(User, null=False, blank=False,
-                             related_name='auth_token_set', on_delete=models.CASCADE)
+    user = models.ForeignKey(
+        User,
+        null=False,
+        blank=False,
+        related_name="auth_token_set",
+        on_delete=models.CASCADE,
+    )
     created = models.DateTimeField(auto_now_add=True)
     expiry = models.DateTimeField(null=True, blank=True)
 
@@ -66,12 +66,12 @@ class AbstractAuthToken(models.Model):
         abstract = True
 
     def __str__(self) -> str:
-        return f'{self.digest} : {self.user}'
+        return f"{self.digest} : {self.user}"
 
 
 class AuthToken(AbstractAuthToken):
     class Meta:
-        swappable = 'KNOX_TOKEN_MODEL'
+        swappable = "KNOX_TOKEN_MODEL"
 
 
 def get_token_model():
