@@ -49,6 +49,24 @@ version = { attr = "knox.__init__.__version__" }
 include = ["knox*"]
 exclude = ["contrib*", "docs*", "tests*", "knox_project*"]
 
+[tool.ruff]
+line-length = 90
+extend-exclude = ["**/migrations/*"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "S", "DJ"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "S105", "S106"]
+"knox_project/**" = ["S105"]
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+known-first-party = ["knox"]
+
 [tool.coverage.run]
 branch = true
 source = ["knox"]
