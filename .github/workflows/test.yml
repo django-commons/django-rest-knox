@@ -13,14 +13,30 @@ jobs:
       with:
         python-version: '3.12'
 
-    - name: Install ruff
-      run: python -m pip install ruff==0.17.5
+    - name: Install dev requirements
+      run: python -m pip install -r requirements-dev.txt
 
     - name: Ruff lint
       run: ruff check .
 
     - name: Ruff format
       run: ruff format --check .
+
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Install dev requirements
+      run: python -m pip install -r requirements-dev.txt
+
+    - name: Mypy
+      run: mypy knox
 
   build:
     runs-on: ubuntu-latest
