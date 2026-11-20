@@ -45,13 +45,17 @@ class AuthTokenAdmin(admin.ModelAdmin):
     raw_id_fields = ("user",)
 
     def get_form(
-        self, request: HttpRequest, obj: models.AuthToken | None = None, **kwargs: Any
+        self,
+        request: HttpRequest,
+        obj: models.AuthToken | None = None,
+        change: bool = False,
+        **kwargs: Any,
     ) -> type[forms.ModelForm]:
-        defaults = {}
+        defaults: dict[str, Any] = {}
         if obj is None:
             defaults["form"] = self.add_form
         defaults.update(kwargs)
-        return super().get_form(request, obj, **defaults)
+        return super().get_form(request, obj, change, **defaults)
 
     def save_model(
         self,
@@ -60,6 +64,6 @@ class AuthTokenAdmin(admin.ModelAdmin):
         form: AuthTokenCreateForm,
         change: bool,
     ) -> None:
-        if not change:
+        if not change and form.token is not None:
             self.message_user(request, "TOKEN " + form.token, messages.INFO)
         super().save_model(request, obj, form, change)

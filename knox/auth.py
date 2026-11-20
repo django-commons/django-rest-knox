@@ -59,17 +59,17 @@ class TokenAuthentication(BaseAuthentication):
         Tokens that have expired will be deleted and skipped
         """
         msg = _("Invalid token.")
-        token = token.decode("utf-8")
+        token_str = token.decode("utf-8")
         for auth_token in (
             get_token_model()
-            .objects.filter(token_key=token[: CONSTANTS.TOKEN_KEY_LENGTH])
+            .objects.filter(token_key=token_str[: CONSTANTS.TOKEN_KEY_LENGTH])
             .select_related("user")
         ):
             if self._cleanup_token(auth_token):
                 continue
 
             try:
-                digest = hash_token(token)
+                digest = hash_token(token_str)
             except (TypeError, binascii.Error):
                 raise exceptions.AuthenticationFailed(msg)
             if compare_digest(digest, auth_token.digest):

@@ -34,7 +34,10 @@ class KnoxSettings(APISettings):
         return self._user_settings
 
 
-knox_settings = KnoxSettings(None, DEFAULTS, IMPORT_STRINGS)
+# djangorestframework-stubs types APISettings' `defaults` argument as DRF's own
+# DefaultsSettings TypedDict; knox's subclass defaults use a different schema, so the
+# mismatch is expected
+knox_settings = KnoxSettings(None, DEFAULTS, IMPORT_STRINGS)  # type: ignore[arg-type]
 
 
 def reload_api_settings(*args: Any, **kwargs: Any) -> None:

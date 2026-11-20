@@ -31,8 +31,10 @@ def get_digest_token(prefix: str | None = None) -> tuple[str, str]:
 _UNSET = object()
 
 
-class AuthTokenManager(models.Manager):
-    def create(
+class AuthTokenManager(models.Manager["AbstractAuthToken"]):
+    # Intentionally narrower than Manager.create: a knox token always belongs
+    # to a user, so `user` is a required argument here.
+    def create(  # type: ignore[override]
         self,
         user: AbstractBaseUser,
         expiry: Any = _UNSET,
