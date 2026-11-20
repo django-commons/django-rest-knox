@@ -1,21 +1,24 @@
+from typing import Any
+
 from django import forms
 from django.contrib import admin, messages
 from django.contrib.auth import get_user_model
+from django.http import HttpRequest
 
 from knox import models
 from knox.settings import CONSTANTS
 
 
 class AuthTokenCreateForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
-        self.token = None
+        self.token: str | None = None
 
     class Meta:
         model = models.AuthToken
         fields = ["user", "expiry"]
 
-    def save(self, commit=True):
+    def save(self, commit: bool = True) -> models.AuthToken:
         obj = super().save(commit=False)
         digest, token = models.get_digest_token()
         obj.digest = digest
@@ -41,14 +44,26 @@ class AuthTokenAdmin(admin.ModelAdmin):
     fields = ()
     raw_id_fields = ("user",)
 
-    def get_form(self, request, obj=None, **kwargs):
-        defaults = {}
+    def get_form(
+        self,
+        request: HttpRequest,
+        obj: models.AuthToken | None = None,
+        change: bool = False,
+        **kwargs: Any,
+    ) -> type[forms.ModelForm]:
+        defaults: dict[str, Any] = {}
         if obj is None:
             defaults["form"] = self.add_form
         defaults.update(kwargs)
-        return super().get_form(request, obj, **defaults)
+        return super().get_form(request, obj, change, **defaults)
 
-    def save_model(self, request, obj, form, change):
-        if not change:
+    def save_model(
+        self,
+        request: HttpRequest,
+        obj: models.AuthToken,
+        form: AuthTokenCreateForm,
+        change: bool,
+    ) -> None:
+        if not change and form.token is not None:
             self.message_user(request, "TOKEN " + form.token, messages.INFO)
         super().save_model(request, obj, form, change)

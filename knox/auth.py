@@ -9,6 +9,7 @@ from rest_framework.authentication import (
     BaseAuthentication,
     get_authorization_header,
 )
+from rest_framework.request import Request
 
 from knox.crypto import hash_token
 from knox.models import get_token_model
@@ -31,7 +32,7 @@ class TokenAuthentication(BaseAuthentication):
     - `request.auth` will be an `AuthToken` instance
     """
 
-    def authenticate(self, request):
+    def authenticate(self, request: Request) -> tuple | None:
         auth = get_authorization_header(request).split()
         prefix = self.authenticate_header(request).encode()
 
@@ -50,7 +51,7 @@ class TokenAuthentication(BaseAuthentication):
         user, auth_token = self.authenticate_credentials(auth[1])
         return (user, auth_token)
 
-    def authenticate_credentials(self, token):
+    def authenticate_credentials(self, token: bytes) -> tuple:
         """
         Due to the random nature of hashing a value, this must inspect
         each auth_token individually to find the correct one.
@@ -58,17 +59,17 @@ class TokenAuthentication(BaseAuthentication):
         Tokens that have expired will be deleted and skipped
         """
         msg = _("Invalid token.")
-        token = token.decode("utf-8")
+        token_str = token.decode("utf-8")
         for auth_token in (
             get_token_model()
-            .objects.filter(token_key=token[: CONSTANTS.TOKEN_KEY_LENGTH])
+            .objects.filter(token_key=token_str[: CONSTANTS.TOKEN_KEY_LENGTH])
             .select_related("user")
         ):
             if self._cleanup_token(auth_token):
                 continue
 
             try:
-                digest = hash_token(token)
+                digest = hash_token(token_str)
             except (TypeError, binascii.Error):
                 raise exceptions.AuthenticationFailed(msg)
             if compare_digest(digest, auth_token.digest):
@@ -95,12 +96,12 @@ class TokenAuthentication(BaseAuthentication):
         if delta > knox_settings.MIN_REFRESH_INTERVAL:
             auth_token.save(update_fields=("expiry",))
 
-    def validate_user(self, auth_token):
+    def validate_user(self, auth_token) -> tuple:
         if not auth_token.user.is_active:
             raise exceptions.AuthenticationFailed(_("User inactive or deleted."))
         return (auth_token.user, auth_token)
 
-    def authenticate_header(self, request):
+    def authenticate_header(self, request: Request) -> str:
         return knox_settings.AUTH_HEADER_PREFIX
 
     def _cleanup_token(self, auth_token) -> bool:

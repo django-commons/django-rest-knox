@@ -1,8 +1,13 @@
+from datetime import datetime, timedelta
+from typing import Any, cast
+
+from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.signals import user_logged_in, user_logged_out
 from django.db.models import Q
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.serializers import DateTimeField
 from rest_framework.settings import api_settings
@@ -17,35 +22,41 @@ class LoginView(APIView):
     authentication_classes = api_settings.DEFAULT_AUTHENTICATION_CLASSES
     permission_classes = (IsAuthenticated,)
 
-    def get_context(self):
+    def get_context(self) -> dict[str, Any]:
         return {"request": self.request, "format": self.format_kwarg, "view": self}
 
-    def get_token_ttl(self):
+    def get_token_ttl(self) -> timedelta | None:
         return knox_settings.TOKEN_TTL
 
-    def get_token_prefix(self):
+    def get_token_prefix(self) -> str:
         return knox_settings.TOKEN_PREFIX
 
-    def get_token_limit_per_user(self):
+    def get_token_limit_per_user(self) -> int | None:
         return knox_settings.TOKEN_LIMIT_PER_USER
 
-    def get_user_serializer_class(self):
+    def get_user_serializer_class(self) -> type | None:
         return knox_settings.USER_SERIALIZER
 
-    def get_expiry_datetime_format(self):
+    def get_expiry_datetime_format(self) -> str | None:
         return knox_settings.EXPIRY_DATETIME_FORMAT
 
-    def format_expiry_datetime(self, expiry):
+    def format_expiry_datetime(self, expiry: datetime | None) -> str | None:
+        if expiry is None:
+            return None
         datetime_format = self.get_expiry_datetime_format()
         return DateTimeField(format=datetime_format).to_representation(expiry)
 
-    def create_token(self):
+    def create_token(self) -> tuple:
         token_prefix = self.get_token_prefix()
+        # IsAuthenticated guarantees an authenticated user here.
+        user = cast(AbstractBaseUser, self.request.user)
         return get_token_model().objects.create(
-            user=self.request.user, expiry=self.get_token_ttl(), prefix=token_prefix
+            user=user, expiry=self.get_token_ttl(), prefix=token_prefix
         )
 
-    def get_post_response_data(self, request, token, instance):
+    def get_post_response_data(
+        self, request: Request, token: str, instance
+    ) -> dict[str, Any]:
         UserSerializer = self.get_user_serializer_class()
 
         data = {"expiry": self.format_expiry_datetime(instance.expiry), "token": token}
@@ -53,15 +64,18 @@ class LoginView(APIView):
             data["user"] = UserSerializer(request.user, context=self.get_context()).data
         return data
 
-    def get_post_response(self, request, token, instance):
+    def get_post_response(self, request: Request, token: str, instance) -> Response:
         data = self.get_post_response_data(request, token, instance)
         return Response(data)
 
-    def post(self, request, format=None):
+    def post(self, request: Request, format: Any = None) -> Response:
         token_limit_per_user = self.get_token_limit_per_user()
         if token_limit_per_user is not None:
             now = timezone.now()
-            token = request.user.auth_token_set.filter(
+            # IsAuthenticated guarantees a real user; the stubs cannot prove
+            # the AnonymousUser arm away, and auth_token_set only exists on
+            # the configured user model.
+            token = request.user.auth_token_set.filter(  # type: ignore[union-attr]
                 Q(expiry__gt=now) | Q(expiry__isnull=True)
             )
             if token.count() >= token_limit_per_user:
@@ -80,11 +94,11 @@ class LogoutView(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 
-    def get_post_response(self, request):
+    def get_post_response(self, request: Request) -> Response:
         return Response(None, status=status.HTTP_204_NO_CONTENT)
 
-    def post(self, request, format=None):
-        request._auth.delete()
+    def post(self, request: Request, format: Any = None) -> Response:
+        request.auth.delete()
         user_logged_out.send(
             sender=request.user.__class__, request=request, user=request.user
         )
@@ -100,11 +114,12 @@ class LogoutAllView(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 
-    def get_post_response(self, request):
+    def get_post_response(self, request: Request) -> Response:
         return Response(None, status=status.HTTP_204_NO_CONTENT)
 
-    def post(self, request, format=None):
-        request.user.auth_token_set.all().delete()
+    def post(self, request: Request, format: Any = None) -> Response:
+        # IsAuthenticated guarantees a real user; see the note in LoginView.
+        request.user.auth_token_set.all().delete()  # type: ignore[union-attr]
         user_logged_out.send(
             sender=request.user.__class__, request=request, user=request.user
         )
