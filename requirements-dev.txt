@@ -1,0 +1,24 @@
+# Development tools. Install into a virtualenv with:
+#   pip install -r requirements-dev.txt
+# CI installs from this file too, so these pins are the versions CI runs.
+
+# knox itself (editable), which also pulls in Django and DRF
+-e .
+# Pinned so mypy sees the same DRF as CI
+djangorestframework==3.18.3
+
+# Linting and formatting
+ruff==0.17.5
+
+# Type checking
+mypy==2.4.1
+django-stubs==6.1.2
+djangorestframework-stubs==3.18.2
+
+# Tests
+tox
+coverage
+freezegun
+
+# Documentation
+mkdocs-material

@@ -13,8 +13,8 @@ jobs:
       with:
         python-version: '3.12'
 
-    - name: Install ruff
-      run: python -m pip install ruff==0.17.5
+    - name: Install dev requirements
+      run: python -m pip install -r requirements-dev.txt
 
     - name: Ruff lint
       run: ruff check .
@@ -32,8 +32,8 @@ jobs:
       with:
         python-version: '3.12'
 
-    - name: Install mypy and stubs
-      run: python -m pip install mypy==2.4.1 django-stubs==6.1.2 djangorestframework-stubs==3.18.2 django djangorestframework
+    - name: Install dev requirements
+      run: python -m pip install -r requirements-dev.txt
 
     - name: Mypy
       run: mypy knox

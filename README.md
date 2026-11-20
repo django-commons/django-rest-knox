@@ -42,6 +42,17 @@ default implementation:
 More information can be found in the
 [Documentation](https://django-commons.org/django-rest-knox/)
 
+# Set up a development environment
+
+All the development tools (ruff, mypy and its stubs, tox, mkdocs) are pinned in
+`requirements-dev.txt`, which CI installs too. In a virtualenv, run:
+
+```
+pip install -r requirements-dev.txt
+```
+
+This also installs knox itself in editable mode.
+
 # Run the tests locally
 
 If you need to debug a test locally and if you have [docker](https://www.docker.com/) installed,
@@ -58,13 +69,12 @@ We use [ruff](https://docs.astral.sh/ruff/) for both linting and formatting, con
 opening a PR:
 
 ```
-pip install ruff==0.17.5
 ruff check .
 ruff format .
 ```
 
-Use the same ruff version as CI (see `.github/workflows/test.yml`) to avoid formatting
-differences. `ruff check --fix .` will fix most lint issues automatically.
+Install ruff from `requirements-dev.txt` so you get the same version as CI and avoid
+formatting differences. `ruff check --fix .` will fix most lint issues automatically.
 
 The commit that reformatted the codebase with ruff is listed in `.git-blame-ignore-revs`.
 To have `git blame` skip it locally, run once:
@@ -82,12 +92,12 @@ plugins, configured in `pyproject.toml`. CI type-checks the `knox` package on ev
 and pull request, so run it before opening a PR:
 
 ```
-pip install mypy==2.4.1 django-stubs==6.1.2 djangorestframework-stubs==3.18.2
 mypy knox
 ```
 
-Use the same mypy and stubs versions as CI (see `.github/workflows/test.yml`). Only the
-`knox` package is checked — `tests/` and `knox_project/` are out of scope for now.
+Run it from the repository root, with mypy and the stubs installed from
+`requirements-dev.txt` so the results match CI. Only the `knox` package is checked —
+`tests/` and `knox_project/` are out of scope for now.
 
 New or changed code in `knox/` should come with type annotations where practical. The
 `py.typed` marker (PEP 561) is not shipped yet; once it is, these annotations become part
