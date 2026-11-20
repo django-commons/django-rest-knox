@@ -1,3 +1,6 @@
+## Unreleased
+- Set up `mypy` type checking of the `knox` package with `django-stubs` and `djangorestframework-stubs`, enforced in CI
+
 ## 6.0.0
 - Drop support for Python 3.10 (EOL Oct 2026), Django 4.2 (EOL Apr 2026) and Django 5.0 (EOL Apr 2025)
 - Add support for Python 3.15 and Django 6.1
